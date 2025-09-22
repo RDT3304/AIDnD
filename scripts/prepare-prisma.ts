@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "node:fs";
+﻿import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 
@@ -6,7 +6,19 @@ loadEnv({ path: resolve(process.cwd(), ".env"), override: false });
 
 const allowedProviders = new Set(["sqlite", "postgresql"]);
 
-const desiredProvider = (process.env.DATABASE_PROVIDER ?? "sqlite").toLowerCase();
+const inferredProvider = (): string => {
+  const explicit = process.env.DATABASE_PROVIDER?.toLowerCase();
+  if (explicit) {
+    return explicit;
+  }
+  const url = process.env.DATABASE_URL ?? "";
+  if (url.startsWith("file:")) {
+    return "sqlite";
+  }
+  return "postgresql";
+};
+
+const desiredProvider = inferredProvider();
 if (!allowedProviders.has(desiredProvider)) {
   throw new Error(
     `Unsupported DATABASE_PROVIDER="${process.env.DATABASE_PROVIDER}". Allowed: sqlite, postgresql.`
