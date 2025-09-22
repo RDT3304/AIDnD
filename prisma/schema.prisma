@@ -226,3 +226,4 @@ model EventLog {
   @@index([campaignId])
   @@index([type])
 }
+
