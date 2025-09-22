@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "mcp-dm-server",
   "version": "0.1.0",
   "description": "Model Context Protocol server for tabletop campaign and combat orchestration",
@@ -16,7 +16,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@fastify/express": "^9.0.0",
+    "@fastify/express": "^4.0.2",
     "@modelcontextprotocol/sdk": "^1.18.1",
     "@prisma/client": "^5.20.0",
     "dotenv": "^16.4.5",
