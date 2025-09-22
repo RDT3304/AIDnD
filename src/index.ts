@@ -1,5 +1,5 @@
 ﻿import "dotenv/config";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createMcpServer } from "./mcp.js";
 import { startHttpServer } from "./http.js";
 
