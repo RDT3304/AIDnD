@@ -1,33 +1,58 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[entrypoint] DATABASE_PROVIDER=${DATABASE_PROVIDER:-unset}"
-echo "[entrypoint] MCP_TRANSPORT=${MCP_TRANSPORT:-unset}"
-echo "[entrypoint] MCP_TOKEN set? $([[ -n "${MCP_TOKEN:-}" ]] && echo yes || echo no)"
-echo "[entrypoint] DATABASE_URL set? $([[ -n "${DATABASE_URL:-}" ]] && echo yes || echo no)"
-echo "[entrypoint] PORT=${PORT:-unset}"
+log() {
+  echo "[entrypoint] $1"
+}
 
-if [[ "${MCP_TRANSPORT:-stdio}" == "http" && -z "${MCP_TOKEN:-}" ]]; then
-  echo "[entrypoint] ERROR: MCP_TRANSPORT=http requires MCP_TOKEN."
-  exit 1
+MCP_TRANSPORT=${MCP_TRANSPORT:-stdio}
+DATABASE_PROVIDER=${DATABASE_PROVIDER:-postgresql}
+
+log "DATABASE_PROVIDER=${DATABASE_PROVIDER}"
+log "MCP_TRANSPORT=${MCP_TRANSPORT}"
+if [[ "$MCP_TRANSPORT" == "http" ]]; then
+  if [[ -z "${MCP_TOKEN:-}" ]]; then
+    log "ERROR: MCP_TRANSPORT=http requires MCP_TOKEN"
+    exit 1
+  fi
+else
+  log "MCP_TOKEN not required for stdio"
 fi
 
 if [[ -z "${DATABASE_URL:-}" ]]; then
-  echo "[entrypoint] ERROR: DATABASE_URL is not set."
-  exit 1
+  log "WARNING: DATABASE_URL not set. Defaulting to sqlite at file:/app/data/prod.db"
+  DATABASE_PROVIDER=sqlite
+  export DATABASE_PROVIDER
+  DATABASE_URL="file:/app/data/prod.db"
+  export DATABASE_URL
 fi
 
-if [[ -z "${DATABASE_PROVIDER:-}" ]]; then
-  echo "[entrypoint] WARNING: DATABASE_PROVIDER not set, defaulting to postgresql." >&2
-  export DATABASE_PROVIDER=postgresql
+if [[ "$DATABASE_PROVIDER" == "sqlite" ]]; then
+  if [[ "$DATABASE_URL" != file:* ]]; then
+    log "ERROR: For sqlite, DATABASE_URL must start with file:"
+    exit 1
+  fi
+  db_path=${DATABASE_URL#file:}
+  if [[ "$db_path" == ./* ]]; then
+    db_path="/app/${db_path#./}"
+  fi
+  db_dir=$(dirname "$db_path")
+  mkdir -p "$db_dir"
+  DATABASE_URL="file:$db_path"
+  export DATABASE_URL
+  log "SQLite database at $db_path"
+else
+  if [[ "$DATABASE_PROVIDER" != "postgresql" ]]; then
+    log "WARNING: Unsupported DATABASE_PROVIDER=$DATABASE_PROVIDER. Using as-is."
+  fi
 fi
 
-echo "[entrypoint] Running prisma migrate deploy"
+log "Running prisma migrate deploy"
 if ! npx prisma migrate deploy; then
-  status=$?
-  echo "[entrypoint] prisma migrate failed with status $status" >&2
-  exit $status
+  code=$?
+  log "ERROR: prisma migrate deploy failed with $code"
+  exit $code
 fi
 
-echo "[entrypoint] Starting server"
+log "Starting node dist/index.js"
 exec node dist/index.js

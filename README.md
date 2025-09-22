@@ -28,7 +28,7 @@ curl -s http://localhost:3030/health
 
 ---
 
-## Postgres Setup
+## Database Setup
 
 - Set `DATABASE_PROVIDER=postgresql`
 - Export `DATABASE_URL=postgres://user:password@host:5432/dbname`
