@@ -19,7 +19,7 @@ COPY . .
 RUN pnpm generate
 RUN pnpm build
 
-FROM node:20-slim AS runner
+FROM base AS runner
 ARG DATABASE_PROVIDER
 ENV DATABASE_PROVIDER=${DATABASE_PROVIDER}
 WORKDIR /app
@@ -35,3 +35,4 @@ COPY --from=build /app/scripts ./scripts
 RUN chmod +x ./scripts/entrypoint.sh
 EXPOSE 3030
 CMD ["./scripts/entrypoint.sh"]
+
