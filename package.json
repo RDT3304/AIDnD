@@ -8,11 +8,11 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx scripts/prepare-prisma.ts && tsx src/index.ts",
     "build": "tsup src/index.ts --format esm,cjs --dts --minify --sourcemap --clean",
     "start": "node dist/index.js",
-    "migrate": "prisma migrate dev",
-    "generate": "prisma generate",
+    "migrate": "tsx scripts/prepare-prisma.ts && prisma migrate dev",
+    "generate": "tsx scripts/prepare-prisma.ts && prisma generate",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

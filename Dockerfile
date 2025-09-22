@@ -1,8 +1,13 @@
-﻿# syntax=docker/dockerfile:1.6
+# syntax=docker/dockerfile:1.6
+
+ARG DATABASE_PROVIDER=postgresql
 FROM node:20-slim AS base
+ARG DATABASE_PROVIDER
+ENV DATABASE_PROVIDER=${DATABASE_PROVIDER}
 WORKDIR /app
 ENV PNPM_HOME=/root/.local/share/pnpm
 ENV PATH=$PNPM_HOME:$PATH
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 RUN corepack enable
 
 FROM base AS deps
@@ -15,6 +20,8 @@ RUN pnpm generate
 RUN pnpm build
 
 FROM node:20-slim AS runner
+ARG DATABASE_PROVIDER
+ENV DATABASE_PROVIDER=${DATABASE_PROVIDER}
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PNPM_HOME=/root/.local/share/pnpm
