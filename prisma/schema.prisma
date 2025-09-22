@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -112,6 +112,7 @@ model Encounter {
   createdAt  DateTime              @default(now())
   updatedAt  DateTime              @updatedAt
   combatants EncounterCombatant[]
+  combats     Combat[]             @relation("EncounterToCombat")
 
   @@index([campaignId])
 }
@@ -132,7 +133,7 @@ model Combat {
   id          String               @id @default(cuid())
   campaign    Campaign             @relation(fields: [campaignId], references: [id])
   campaignId  String
-  encounter   Encounter?           @relation(fields: [encounterId], references: [id])
+  encounter   Encounter?           @relation("EncounterToCombat", fields: [encounterId], references: [id])
   encounterId String?
   round       Int                  @default(1)
   turnIndex   Int                  @default(0)
