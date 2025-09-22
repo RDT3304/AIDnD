@@ -47,8 +47,12 @@ fi
 log "Running prisma migrate deploy"
 if ! npx prisma migrate deploy; then
   code=$?
-  log "ERROR: prisma migrate deploy failed with $code"
-  exit $code
+  log "migrate deploy exited with $code; attempting prisma db push"
+  if ! npx prisma db push; then
+    push_code=$?
+    log "ERROR: prisma db push failed with $push_code"
+    exit $push_code
+  fi
 fi
 
 log "Starting node dist/index.js"
