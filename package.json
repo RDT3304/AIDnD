@@ -1,4 +1,4 @@
-{
+﻿{
     "name":  "mcp-dm-server",
     "version":  "0.1.0",
     "description":  "Model Context Protocol server for tabletop campaign and combat orchestration",
@@ -9,7 +9,7 @@
                 },
     "scripts":  {
                     "dev":  "tsx scripts/prepare-prisma.ts && tsx src/index.ts",
-                    "build":  "tsup src/index.ts --format esm,cjs --minify --sourcemap --clean",
+                    "build":  "tsup src/index.ts --format esm,cjs --minify --sourcemap --clean --external @modelcontextprotocol/sdk",
                     "start":  "node dist/index.js",
                     "migrate":  "tsx scripts/prepare-prisma.ts && prisma migrate dev",
                     "generate":  "tsx scripts/prepare-prisma.ts && prisma generate",

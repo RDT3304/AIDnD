@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "CombatStatus" AS ENUM ('active', 'completed');
 
 -- CreateTable
