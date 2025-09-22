@@ -1,0 +1,37 @@
+﻿{
+  "name": "mcp-dm-server",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for tabletop campaign and combat orchestration",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup src/index.ts --format esm,cjs --dts --minify --sourcemap --clean",
+    "start": "node dist/index.js",
+    "migrate": "prisma migrate dev",
+    "generate": "prisma generate",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/express": "^9.0.0",
+    "@modelcontextprotocol/sdk": "^1.18.1",
+    "@prisma/client": "^5.20.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "fastify": "^4.28.1",
+    "seedrandom": "^3.0.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "@types/seedrandom": "^2.4.34",
+    "prisma": "^5.20.0",
+    "tsup": "^8.0.1",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}

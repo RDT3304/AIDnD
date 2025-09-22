@@ -1,0 +1,227 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id           String    @id @default(cuid())
+  title        String
+  system       String    @default("5e")
+  premise      String?
+  tone         String?
+  sessionZero  String?
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions     Session[]
+  locations    Location[]
+  npcs         Npc[]
+  items        Item[]
+  quests       Quest[]
+  encounters   Encounter[]
+  combats      Combat[]
+  randomTables RandomTable[]
+  snapshots    Snapshot[]
+  events       EventLog[]
+
+  @@index([title])
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  title       String
+  summary     String?
+  scheduledAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  name        String
+  kind        String?
+  description String?
+  tags        Json?
+  stats       Json?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([name])
+}
+
+model Npc {
+  id          String   @id @default(cuid())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  name        String
+  role        String?
+  disposition String?
+  biography   String?
+  statBlock   Json?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([name])
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  name        String
+  rarity      String?
+  description String?
+  data        Json?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+model Quest {
+  id          String   @id @default(cuid())
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  title       String
+  status      String   @default("open")
+  summary     String?
+  details     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([status])
+}
+
+model Encounter {
+  id         String                @id @default(cuid())
+  campaign   Campaign              @relation(fields: [campaignId], references: [id])
+  campaignId String
+  name       String
+  difficulty String                @default("medium")
+  notes      String?
+  metadata   Json?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  combatants EncounterCombatant[]
+
+  @@index([campaignId])
+}
+
+model EncounterCombatant {
+  id          String     @id @default(cuid())
+  encounter   Encounter  @relation(fields: [encounterId], references: [id])
+  encounterId String
+  name        String
+  side        String     @default("enemy")
+  base        Json?
+  createdAt   DateTime   @default(now())
+
+  @@index([encounterId])
+}
+
+model Combat {
+  id          String               @id @default(cuid())
+  campaign    Campaign             @relation(fields: [campaignId], references: [id])
+  campaignId  String
+  encounter   Encounter?           @relation(fields: [encounterId], references: [id])
+  encounterId String?
+  round       Int                  @default(1)
+  turnIndex   Int                  @default(0)
+  version     Int                  @default(1)
+  status      String               @default("active")
+  initiative  Json?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  combatants  CombatantInCombat[]
+
+  @@index([campaignId])
+  @@index([encounterId])
+}
+
+model CombatantInCombat {
+  id         String   @id @default(cuid())
+  combat     Combat   @relation(fields: [combatId], references: [id])
+  combatId   String
+  name       String
+  side       String   @default("enemy")
+  maxHp      Int      @default(0)
+  currentHp  Int      @default(0)
+  tempHp     Int      @default(0)
+  initiative Int      @default(0)
+  conditions Json?
+  notes      String?
+  stats      Json?
+  createdAt  DateTime @default(now())
+
+  @@index([combatId])
+  @@index([initiative])
+}
+
+model RandomTable {
+  id          String              @id @default(cuid())
+  campaign    Campaign?           @relation(fields: [campaignId], references: [id])
+  campaignId  String?
+  name        String
+  dice        String
+  scope       String?
+  createdAt   DateTime            @default(now())
+  entries     RandomTableEntry[]
+
+  @@index([campaignId])
+  @@index([name])
+}
+
+model RandomTableEntry {
+  id        String      @id @default(cuid())
+  table     RandomTable @relation(fields: [tableId], references: [id])
+  tableId   String
+  min       Int
+  max       Int
+  result    Json
+  createdAt DateTime    @default(now())
+
+  @@index([tableId])
+  @@index([min, max])
+}
+
+model RulesIndex {
+  id        String   @id @default(cuid())
+  system    String
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([system])
+}
+
+model Snapshot {
+  id         String    @id @default(cuid())
+  campaign   Campaign  @relation(fields: [campaignId], references: [id])
+  campaignId String
+  label      String?
+  payload    Json
+  createdAt  DateTime  @default(now())
+
+  @@index([campaignId])
+}
+
+model EventLog {
+  id         String    @id @default(cuid())
+  campaign   Campaign? @relation(fields: [campaignId], references: [id])
+  campaignId String?
+  type       String
+  summary    String
+  payload    Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([campaignId])
+  @@index([type])
+}
